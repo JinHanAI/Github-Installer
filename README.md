@@ -1,46 +1,71 @@
 # Github-Installer
 
-> *「装完了，然后呢？」*
+> *「每次都说下次不忘，每次都忘。」*
 
 [![License: GPL v3](https://img.shields.io/badge/License-GPL%20v3-blue.svg)](LICENSE)
 [![Claude Code](https://img.shields.io/badge/Claude%20Code-Skill-blueviolet)](https://claude.ai/code)
 [![Skills](https://img.shields.io/badge/skills.sh-Compatible-green)](https://skills.sh)
 
-**Claude Code 安装 GitHub 项目，最容易漏的不是安装本身，而是装完之后的那几步。**
+我装了 30 多个 Claude Code 技能。每次装完都跟自己说"记得更新 README"。每次都没记。
 
-检查 API Key 了吗？触发词分析了吗？Skills README 更新了吗？——每次都说"下次不会忘"，每次都忘。
+直到有一天想找一个已安装的技能，翻遍 README —— 没记录。这技能什么时候装的？要不要配 API Key？触发词是什么？全不知道。
 
-Github-Installer 用 **Skill + Hook 双层机制**解决这个问题：Hook 检测意图，Skill 强制执行检查清单，确保每次安装都走完完整流程。
+**Github-Installer 就是被这件事逼出来的。**
 
-[看效果](#效果示例) · [安装](#安装) · [工作原理](#工作原理) · [English](#english)
+它不做安装这件事——`git clone` 谁都会。它做的是安装之后你总忘记的那四步：检查配置、分析触发词、更新 README、确认汇报。配合 Hook，你连"调用技能"都不用说，说"安装"就行。
+
+[翻车现场](#翻车现场) · [安装](#安装) · [工作原理](#工作原理) · [English](#english)
 
 ---
 
-## 效果示例
+## 翻车现场
+
+### 😱 没有 Github-Installer 时
 
 ```
-用户      ❯ 安装 https://github.com/alchaincyf/nuwa-skill
+用户      ❯ 安装 https://github.com/xxx/some-skill
 
-AI        ❯ 🔍 检测到安装 GitHub 项目意图，调用 github-installer 技能...
+AI        ❯ 已克隆到社区技能目录，安装完成！
+            （结束。没有检查配置，没有更新 README，没有分析触发词。）
+
+--- 3 天后 ---
+
+用户      ❯ 用 some-skill 帮我分析一下这个数据
+
+AI        ❯ some-skill 需要配置 API_KEY 才能使用，请先设置环境变量。
+            您没有安装这个技能。
+
+用户      ❯ ？？？我三天前明明装了
+```
+
+装了 = 没装。因为没人检查配置、没人更新 README、没人记录触发词。
+
+### ✅ 有了 Github-Installer 后
+
+```
+用户      ❯ 安装 https://github.com/xxx/some-skill
+
+AI        ❯ 🔍 自动分类：社区技能
+            📦 克隆 → 安装依赖 → 全局注册
 
             步骤 1/4：检查配置需求
-            ✅ 纯 Markdown 指令型技能，无需 API Key / Token / 依赖安装
+            ⚠️ 需要 TAVILY_API_KEY（环境变量），请配置后使用
 
             步骤 2/4：分析触发词
-            ✅ 「造skill」「蒸馏XX」「女娲」「造人」「XX的思维方式」
+            ✅ 「智能搜索」「tavily」「AI搜索」「网络搜索」
 
             步骤 3/4：更新 Skills README
             ✅ 已在速查表、全局技能表、新增记录表中登记
 
             步骤 4/4：确认汇报
-            📦 Nuwa-Skill（女娲思维蒸馏）| ⭐ 3,217 | 社区技能
-            📁 社区技能（网络下载）/nuwa-skill_女娲思维蒸馏
-            🔧 无需额外配置
+            📦 Some-Skill（智能搜索工具）| ⭐ 1,234 | 社区技能
+            📁 社区技能（网络下载）/some-skill_智能搜索工具
+            ⚠️ 需要配置 TAVILY_API_KEY 环境变量
 
             ✅ 安装完成
 ```
 
-没有 Hook 也行。但有了 Hook，你连"调用技能"这句话都不用说——检测到"安装"+ GitHub URL 就自动触发。
+**装完就是能用的。** 配置缺什么、触发词是什么、装在哪个目录，全在眼前。
 
 ---
 
@@ -51,29 +76,18 @@ AI        ❯ 🔍 检测到安装 GitHub 项目意图，调用 github-installer
 **1. 安装 Skill**
 
 ```bash
-cd ~/.claude/skills/  # 或你的自定义 Skills 目录
+cd ~/.claude/skills/
 git clone https://github.com/JinHanAI/Github-Installer.git github-installer
 ```
 
 **2. 配置 Hook**
 
-Hook 是关键——它监听你提交的每条消息，检测到"安装"+ GitHub URL 时自动注入提示。
+Hook 监听你提交的每条消息。检测到"安装"+ GitHub URL 时，自动注入提示调用 Skill。
+脚本已包含在仓库中，直接复制即可：
 
 ```bash
 mkdir -p ~/.claude/hooks
-cat > ~/.claude/hooks/github-installer-trigger.sh << 'EOF'
-#!/bin/bash
-INPUT=$(cat)
-PROMPT=$(echo "$INPUT" | jq -r '.prompt // empty')
-
-if echo "$PROMPT" | grep -qi "安装" && echo "$PROMPT" | grep -qi "github\.com"; then
-    echo '{"hookSpecificOutput":{"hookEventName":"UserPromptSubmit","additionalContext":"检测到安装 GitHub 项目的意图。请立即使用 Skill 工具调用 github-installer 技能执行完整安装流程（分类→克隆→安装依赖→检查配置→分析触发词→更新README→确认汇报）。"}}'
-    exit 0
-fi
-
-exit 0
-EOF
-
+cp github-installer/hooks/github-installer-trigger.sh ~/.claude/hooks/
 chmod +x ~/.claude/hooks/github-installer-trigger.sh
 ```
 
@@ -109,7 +123,7 @@ cd ~/.claude/skills/
 git clone https://github.com/JinHanAI/Github-Installer.git github-installer
 ```
 
-手动触发：对话中说 `github-installer` + GitHub URL 即可。
+没有 Hook 就不会自动触发，但对话中说 `github-installer` + GitHub URL 仍可手动调用。
 
 ---
 
@@ -185,6 +199,19 @@ git clone https://github.com/JinHanAI/Github-Installer.git github-installer
 
 ---
 
+## 仓库结构
+
+```
+Github-Installer/
+├── SKILL.md                             # 技能定义（Claude Code 读取这个文件）
+├── hooks/
+│   └── github-installer-trigger.sh      # Hook 脚本（复制到 ~/.claude/hooks/ 即可）
+├── LICENSE                              # GPL 3.0
+└── README.md                            # 你正在读的这个文件
+```
+
+---
+
 ## 许可证
 
 GPL 3.0 — 随便用，随便改，改了请开源。
@@ -193,46 +220,95 @@ GPL 3.0 — 随便用，随便改，改了请开源。
 
 ## English
 
-> *"You installed it. Then what?"*
+> *"Every time I tell myself I won't forget next time. Every time, I forget."*
 
-The hardest part of installing GitHub projects into Claude Code isn't the installation itself — it's the post-install steps you keep forgetting.
+I installed 30+ Claude Code skills. Every time I told myself "remember to update the README." Every time I forgot.
 
-Did you check for API keys? Analyze trigger words? Update your Skills README?
+One day I needed a skill I'd installed days ago. Searched the README — no record. When was it installed? Does it need an API key? What are the trigger words? No idea.
 
-**Github-Installer** solves this with a **Skill + Hook dual mechanism**: the Hook detects your intent, the Skill enforces a mandatory 4-step checklist. Every time.
+**Github-Installer was born out of that frustration.**
 
-**Install:**
+It doesn't do the installation — `git clone` handles that. It does the 4 steps you always forget afterwards: check config, analyze triggers, update README, confirm report. With the Hook, you don't even need to say "invoke skill" — just say "安装" (install) and it kicks in.
+
+### Before vs After
+
+**Without Github-Installer:**
+```
+You: Install https://github.com/xxx/some-skill
+AI:  Cloned and installed! ✅
+     (No config check. No README update. No trigger words.)
+
+--- 3 days later ---
+You: Use some-skill to analyze this
+AI:  some-skill requires API_KEY. Also, I don't see it installed.
+You: ？？？ I literally installed it 3 days ago
+```
+
+Installed ≠ usable. Because nobody checked config, updated README, or recorded triggers.
+
+**With Github-Installer:**
+```
+You: 安装 https://github.com/xxx/some-skill
+AI:  🔍 Auto-classified: Community Skill
+     📦 Clone → Install → Global register
+
+     Step 1/4: Check config
+     ⚠️ Requires TAVILY_API_KEY (env var)
+
+     Step 2/4: Analyze triggers
+     ✅ 「smart search」「tavily」「AI search」「web search」
+
+     Step 3/4: Update Skills README
+     ✅ Registered in 3 tables
+
+     Step 4/4: Confirm report
+     📦 Some-Skill | ⭐ 1,234 | Community Skill
+     ⚠️ Needs TAVILY_API_KEY configured
+
+     ✅ Install complete
+```
+
+**Installed = ready to use.** What's missing, what triggers it, where it lives — all visible.
+
+### Install
 
 ```bash
 cd ~/.claude/skills/
 git clone https://github.com/JinHanAI/Github-Installer.git github-installer
+
+# Set up Hook (recommended)
+mkdir -p ~/.claude/hooks
+cp github-installer/hooks/github-installer-trigger.sh ~/.claude/hooks/
+chmod +x ~/.claude/hooks/github-installer-trigger.sh
 ```
 
-**How it works:**
+Then add to `~/.claude/settings.json`:
 
+```json
+{
+  "hooks": {
+    "UserPromptSubmit": [
+      {
+        "hooks": [
+          {
+            "type": "command",
+            "command": "/Users/YOUR_USERNAME/.claude/hooks/github-installer-trigger.sh"
+          }
+        ]
+      }
+    ]
+  }
+}
 ```
-You say: "安装 https://github.com/xxx/yyy"
-  → UserPromptSubmit Hook fires (detects "安装" + "github.com")
-  → Hook injects: "Please invoke github-installer skill"
-  → Skill loads 4-step checklist
-  → Step 1: Check config (API keys, tokens, env vars)
-  → Step 2: Analyze trigger words (at least 1 EN + 1 CN)
-  → Step 3: Update Skills README (3 locations)
-  → Step 4: Confirm report (summary to user)
-```
 
-**Auto-classification:** MCP servers, plugins, skills, CLI tools — sorted by keywords, installed to the right directory automatically.
+### The 3 iron rules
 
-**The 3 iron rules:**
 1. All 4 steps must complete before saying "done"
 2. Any failure must be reported, never silently skipped
 3. README update is mandatory, not optional
-
-See the Chinese README above for the Hook setup guide and detailed configuration.
 
 ---
 
 **Author:** Victor.Chen ([@AIJinHan](https://github.com/JinHanAI))
 
 **License:** GPL 3.0
-
