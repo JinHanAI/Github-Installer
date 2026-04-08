@@ -2,7 +2,7 @@
 
 > *「每次都说下次不忘，每次都忘。」*
 
-[![License: GPL v3](https://img.shields.io/badge/License-GPL%20v3-blue.svg)](LICENSE)
+[![License: Apache 2.0](https://img.shields.io/badge/License-Apache%202.0-blue.svg)](LICENSE)
 [![Claude Code](https://img.shields.io/badge/Claude%20Code-Skill-blueviolet)](https://claude.ai/code)
 [![Skills](https://img.shields.io/badge/skills.sh-Compatible-green)](https://skills.sh)
 
@@ -214,7 +214,7 @@ Github-Installer/
 
 ## 许可证
 
-GPL 3.0 — 随便用，随便改，改了请开源。
+Apache 2.0 — 随便用，随便改，保留署名即可。
 
 ---
 
@@ -311,4 +311,4 @@ Then add to `~/.claude/settings.json`:
 
 **Author:** Victor.Chen ([@AIJinHan](https://github.com/JinHanAI))
 
-**License:** GPL 3.0
+**License:** Apache 2.0
