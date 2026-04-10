@@ -6,6 +6,8 @@
 [![Claude Code](https://img.shields.io/badge/Claude%20Code-Skill-blueviolet)](https://claude.ai/code)
 [![Skills](https://img.shields.io/badge/skills.sh-Compatible-green)](https://skills.sh)
 
+![Github-Installer Banner](banner.jpg)
+
 我装了 30 多个 Claude Code 技能。每次装完都跟自己说"记得更新 README"。每次都没记。
 
 直到有一天想找一个已安装的技能，翻遍 README —— 没记录。这技能什么时候装的？要不要配 API Key？触发词是什么？全不知道。
@@ -206,7 +208,8 @@ Github-Installer/
 ├── SKILL.md                             # 技能定义（Claude Code 读取这个文件）
 ├── hooks/
 │   └── github-installer-trigger.sh      # Hook 脚本（复制到 ~/.claude/hooks/ 即可）
-├── LICENSE                              # GPL 3.0
+├── banner.jpg                           # 项目 Banner 图
+├── LICENSE                              # Apache 2.0
 └── README.md                            # 你正在读的这个文件
 ```
 
