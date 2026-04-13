@@ -6,7 +6,7 @@
 [![Claude Code](https://img.shields.io/badge/Claude%20Code-Skill-blueviolet)](https://claude.ai/code)
 [![Skills](https://img.shields.io/badge/skills.sh-Compatible-green)](https://skills.sh)
 
-![Github-Installer Banner](banner.jpg)
+![Github-Installer Architecture](architecture.png)
 
 我装了 30 多个 Claude Code 技能。每次装完都跟自己说"记得更新 README"。每次都没记。
 
@@ -208,7 +208,7 @@ Github-Installer/
 ├── SKILL.md                             # 技能定义（Claude Code 读取这个文件）
 ├── hooks/
 │   └── github-installer-trigger.sh      # Hook 脚本（复制到 ~/.claude/hooks/ 即可）
-├── banner.jpg                           # 项目 Banner 图
+├── architecture.png                    # 项目架构图
 ├── LICENSE                              # Apache 2.0
 └── README.md                            # 你正在读的这个文件
 ```
